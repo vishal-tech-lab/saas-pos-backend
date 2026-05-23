@@ -24,7 +24,7 @@ public class CorsConfig {
         );
 
         config.addAllowedOrigin(
-                "https://govindanvegetables.netlify.app"
+                "https://nexgenpos.netlify.app"
         );
 
         // ALLOW METHODS
