@@ -26,7 +26,9 @@ public class CorsConfig {
         config.addAllowedOrigin(
                 "https://nexgenpos.netlify.app"
         );
-
+config.addAllowedOrigin(
+    "https://www.nexgenpos.netlify.app"
+);
         // ALLOW METHODS
 
         config.addAllowedMethod("*");
