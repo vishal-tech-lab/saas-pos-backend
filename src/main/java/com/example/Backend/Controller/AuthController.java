@@ -1,6 +1,6 @@
 package com.example.Backend.Controller;
 
-import java.util.Map;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +24,20 @@ public class AuthController {
 
             User user = service.login(req.getUsername(), req.getPassword());
 
-            return ResponseEntity.ok(Map.of("id", user.getId(), "username", user.getUsername(), "role", user.getRole(), "status", user.getStatus(), "schema", user.getSchema()));
+HashMap<String, Object> response =
+        new HashMap<>();
 
+response.put("id", user.getId());
+
+response.put("username", user.getUsername());
+
+response.put("role", user.getRole());
+
+response.put("status", user.getStatus());
+
+response.put("schema", user.getSchema());
+
+return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
 
             return ResponseEntity.badRequest().body(e.getMessage());
