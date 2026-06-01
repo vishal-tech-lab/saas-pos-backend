@@ -88,7 +88,8 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/auth/login",
                         "/auth/signup",
-                        "/auth/refresh"
+            "/auth/refresh",
+        "/tenant/create"
                         
                 ).permitAll()
 
