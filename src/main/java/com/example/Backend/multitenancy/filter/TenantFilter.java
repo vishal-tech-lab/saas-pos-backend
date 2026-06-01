@@ -28,27 +28,23 @@ public class TenantFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String tenant =
-        request.getHeader(
-                "X-Tenant-ID"
-        );
+       String path = request.getServletPath();
 
 if (
-        tenant == null ||
-        tenant.isBlank()
+        path.equals("/")
+        || path.startsWith("/tenant/create")
+        || path.startsWith("/auth/login")
+        || path.startsWith("/auth/signup")
+        || path.startsWith("/auth/refresh")
 ) {
 
-    logger.warn(
-            "Tenant resolution failed, missing X-Tenant-ID for path: {}",
-            request.getServletPath()
-    );
-
-    response.sendError(
-            HttpServletResponse.SC_BAD_REQUEST,
-            "X-Tenant-ID header is required"
+    filterChain.doFilter(
+            request,
+            response
     );
 
     return;
+
 }
         TenantContext.setTenant(tenant);
         logger.info("Tenant resolved: {}", tenant);
