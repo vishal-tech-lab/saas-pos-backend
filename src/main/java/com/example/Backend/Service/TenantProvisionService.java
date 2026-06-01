@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import com.example.Backend.Dto.TenantRequest;
 import com.example.Backend.Entity.Tenant;
 import com.example.Backend.Repository.TenantRepository;
-
+import com.example.Backend.Dto.TenantLoginResponse;
+import com.example.Backend.Dto.TenantLoginRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 @Service
 public class TenantProvisionService {
 
