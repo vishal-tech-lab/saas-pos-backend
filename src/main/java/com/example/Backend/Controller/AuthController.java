@@ -55,7 +55,7 @@ public class AuthController {
 
             ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                 .httpOnly(true)
-                .secure(isSecure)
+                .secure(true)
                 .path("/")
                 .sameSite("None")
                 .maxAge(jwtExpirationMs / 1000)
@@ -63,7 +63,7 @@ public class AuthController {
 
             ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(true)
-                .secure(isSecure)
+                .secure(true)
                 .path("/")
                 .sameSite("None")
                 .maxAge(jwtRefreshExpirationMs / 1000)
@@ -122,7 +122,7 @@ public class AuthController {
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
             .httpOnly(true)
-            .secure(isSecure)
+            .secure(true)
             .path("/")
             .sameSite("None")
             .maxAge(jwtExpirationMs / 1000)
@@ -147,19 +147,21 @@ public class AuthController {
 
         @PostMapping("/logout")
         public ResponseEntity<?> logout() {
-        ResponseCookie accessCookie = ResponseCookie.from("access_token", "")
-            .httpOnly(true)
-            .path("/")
-            .maxAge(0)
-            .sameSite("None")
-            .build();
+       ResponseCookie accessCookie = ResponseCookie.from("access_token", "")
+    .httpOnly(true)
+    .secure(true)
+    .path("/")
+    .maxAge(0)
+    .sameSite("None")
+    .build();
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
-            .httpOnly(true)
-            .path("/")
-            .maxAge(0)
-            .sameSite("None")
-            .build();
+ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
+    .httpOnly(true)
+    .secure(true)
+    .path("/")
+    .maxAge(0)
+    .sameSite("None")
+    .build();
 
         logger.info("Logout requested");
         return ResponseEntity.ok()
