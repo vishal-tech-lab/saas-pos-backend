@@ -24,4 +24,17 @@ public class TenantController {
         return tenantProvisionService
                 .createTenant(request);
     }
+    @PostMapping("/login")
+public TenantLoginResponse login(
+
+        @RequestBody
+        TenantLoginRequest request
+) {
+
+    return tenantProvisionService.login(
+
+            request.getUsername(),
+            request.getPassword()
+    );
+}
 }

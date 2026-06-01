@@ -29,4 +29,8 @@ private String companyName;
 private String schemaName;
 
 private String username;
+
+@Column(nullable = false)
+private String password;
+
 }

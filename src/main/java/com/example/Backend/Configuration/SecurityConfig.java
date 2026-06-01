@@ -89,7 +89,8 @@ public class SecurityConfig {
                         "/auth/login",
                         "/auth/signup",
             "/auth/refresh",
-        "/tenant/create"
+        "/tenant/create",
+        "/tenant/login"
                         
                 ).permitAll()
 
