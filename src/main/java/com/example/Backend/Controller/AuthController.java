@@ -57,7 +57,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(isSecure)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(jwtExpirationMs / 1000)
                 .build();
 
@@ -65,7 +65,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(isSecure)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(jwtRefreshExpirationMs / 1000)
                 .build();
 
@@ -124,7 +124,7 @@ public class AuthController {
             .httpOnly(true)
             .secure(isSecure)
             .path("/")
-            .sameSite("Strict")
+            .sameSite("None")
             .maxAge(jwtExpirationMs / 1000)
             .build();
 
@@ -151,14 +151,14 @@ public class AuthController {
             .httpOnly(true)
             .path("/")
             .maxAge(0)
-            .sameSite("Strict")
+            .sameSite("None")
             .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
             .httpOnly(true)
             .path("/")
             .maxAge(0)
-            .sameSite("Strict")
+            .sameSite("None")
             .build();
 
         logger.info("Logout requested");
