@@ -1,5 +1,6 @@
 package com.example.Backend.Controller;
 
+import com.example.Backend.Dto.SalesItemDto;
 import com.example.Backend.Dto.SalesReportDto;
 import com.example.Backend.Entity.Salesitem;
 import com.example.Backend.Service.SalesitemService;
@@ -23,27 +24,23 @@ public class SalesitemController {
      * POST /salesitem/register
      */
     @PostMapping("/register")
-    public ResponseEntity<Salesitem> registerSalesitem(@RequestBody Salesitem salesitem) {
-        Salesitem savedSalesitem = salesitemService.registerSalesitem(salesitem);
+    public ResponseEntity<Salesitem> registerSalesitem(@RequestBody SalesItemDto salesItemDto) {
+        Salesitem savedSalesitem = salesitemService.registerSalesitem(salesItemDto);
         return new ResponseEntity<>(savedSalesitem, HttpStatus.CREATED);
     }
-@PostMapping("/closeregister")
-public ResponseEntity<String> closeRegister() {
+@PostMapping("/closeregister/{branchId}")
+public ResponseEntity<String> closeRegister(
+        @PathVariable Long branchId
+) {
+    salesitemService.closeRegister(branchId);
 
-    salesitemService.closeRegister();
-
-    return new ResponseEntity<>(
-            "Register Closed",
-            HttpStatus.OK
+    return ResponseEntity.ok(
+            "Register Closed"
     );
-}
-    /**
-     * Get all sales items
-     * GET /salesitem/all
-     */
+}  
     @GetMapping("/all")
-    public ResponseEntity<List<Salesitem>> getAllSalesitems() {
-        List<Salesitem> salesitems = salesitemService.getAllSalesitems();
+    public ResponseEntity<List<Salesitem>> getAllSalesitems(@RequestParam(required = false) Long branchid) {
+        List<Salesitem> salesitems = salesitemService.getAllSalesitems(branchid);
         return new ResponseEntity<>(salesitems, HttpStatus.OK);
     }
 
@@ -52,8 +49,11 @@ public ResponseEntity<String> closeRegister() {
      * GET /salesitem/bill/{billno}
      */
     @GetMapping("/bill/{billno}")
-    public ResponseEntity<List<Salesitem>> getSalesitemsByBillno(@PathVariable String billno) {
-        List<Salesitem> salesitems = salesitemService.getSalesitemsByBillno(billno);
+    public ResponseEntity<List<Salesitem>> getSalesitemsByBillno(
+            @PathVariable String billno,
+            @RequestParam(required = false) Long branchid
+    ) {
+        List<Salesitem> salesitems = salesitemService.getSalesitemsByBillno(billno, branchid);
         if (!salesitems.isEmpty()) {
             return new ResponseEntity<>(salesitems, HttpStatus.OK);
         }
@@ -102,10 +102,10 @@ public ResponseEntity<String> closeRegister() {
  * GET /salesitem/report
  */
 @GetMapping("/report")
-public ResponseEntity<SalesReportDto> getSalesReport() {
+public ResponseEntity<SalesReportDto> getSalesReport(@RequestParam(required = false) Long branchid) {
 
     SalesReportDto report =
-            salesitemService.getSalesReport();
+            salesitemService.getSalesReport(branchid);
 
     return new ResponseEntity<>(
             report,

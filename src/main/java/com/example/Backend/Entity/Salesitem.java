@@ -34,9 +34,15 @@ public class Salesitem {
 
     @Column(nullable = true)
     private Long customerid;
+
     @Column(nullable = true)
     private String paymentmethod;
+
+    @ManyToOne
+    @JoinColumn(name = "branchid")
+    private Branch branch;
+
     @Column(nullable = false)
-private LocalDateTime createdat;
+    private LocalDateTime createdat;
 }
 

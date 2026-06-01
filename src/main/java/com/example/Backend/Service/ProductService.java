@@ -1,8 +1,12 @@
 package com.example.Backend.Service;
 
 import com.example.Backend.Entity.Product;
+import com.example.Backend.Entity.User;
 import com.example.Backend.Repository.ProductRepository;
+import com.example.Backend.Repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -12,11 +16,17 @@ import java.util.Optional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     /**
      * Register a new product
      */
     public Product registerProduct(Product product) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username);
+        if (user != null) {
+            product.setBranch(user.getBranch());
+        }
         return productRepository.save(product);
     }
 

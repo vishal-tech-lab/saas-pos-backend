@@ -3,6 +3,8 @@
 package com.example.Backend.multitenancy.config;
 
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -13,6 +15,9 @@ import java.sql.SQLException;
 @Component
 public class MultiTenantConnectionProviderImpl
         implements MultiTenantConnectionProvider<String> {
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(MultiTenantConnectionProviderImpl.class);
 
     private final DataSource dataSource;
 
@@ -43,14 +48,16 @@ public class MultiTenantConnectionProviderImpl
             String tenantIdentifier
     ) throws SQLException {
 
-        System.out.println(
-                "SWITCHING SCHEMA TO : "
-                        + tenantIdentifier
-        );
+        logger.info("Switching database schema to tenant: {}", tenantIdentifier);
 
         Connection connection = getAnyConnection();
 
-        connection.setSchema(tenantIdentifier);
+        try {
+            connection.setSchema(tenantIdentifier);
+        } catch (SQLException e) {
+            logger.error("Database schema switch failed for tenant: {}", tenantIdentifier, e);
+            throw e;
+        }
 
         return connection;
     }
@@ -60,8 +67,6 @@ public class MultiTenantConnectionProviderImpl
             String tenantIdentifier,
             Connection connection
     ) throws SQLException {
-
-        connection.setSchema("public");
 
         releaseAnyConnection(connection);
     }

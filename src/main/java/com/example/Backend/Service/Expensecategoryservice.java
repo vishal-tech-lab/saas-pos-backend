@@ -6,14 +6,24 @@ import org.springframework.stereotype.Service;
 
 import com.example.Backend.Entity.Expensecategory;
 import com.example.Backend.Repository.Expensecategoryrepo;
+import com.example.Backend.Repository.UserRepository;
+import com.example.Backend.Entity.User;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Service
 public class Expensecategoryservice {
 
     @Autowired
     private Expensecategoryrepo expensecategoryrepo;
+    @Autowired
+    private UserRepository userRepository;
 
     public String getthetotalcatogry(Expensecategory expensecategory) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username);
+        if (user != null) {
+            expensecategory.setBranch(user.getBranch());
+        }
         expensecategoryrepo.save(expensecategory);
         return "successfully saved";
     }

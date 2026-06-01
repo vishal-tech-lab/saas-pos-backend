@@ -5,6 +5,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,5 +25,13 @@ public class ItemCategory {
     private Long itemcategoryid;
 
     private String itemcategoryname;
+
+        @ManyToOne
+        @JoinColumn(name = "branchid")
+        @JsonIgnoreProperties({
+            "hibernateLazyInitializer",
+            "handler"
+        })
+        private Branch branch;
 
 }

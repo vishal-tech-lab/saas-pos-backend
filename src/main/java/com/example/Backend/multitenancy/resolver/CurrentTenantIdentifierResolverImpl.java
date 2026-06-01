@@ -2,6 +2,8 @@
 package com.example.Backend.multitenancy.resolver;
 
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.example.Backend.multitenancy.tenant.TenantContext;
@@ -10,18 +12,24 @@ import com.example.Backend.multitenancy.tenant.TenantContext;
 public class CurrentTenantIdentifierResolverImpl
         implements CurrentTenantIdentifierResolver<String> {
 
-    private static final String DEFAULT_TENANT = "public";
+    private static final Logger logger =
+            LoggerFactory.getLogger(CurrentTenantIdentifierResolverImpl.class);
 
     @Override
     public String resolveCurrentTenantIdentifier() {
 
         String tenant = TenantContext.getTenant();
 
-        System.out.println("RESOLVED TENANT : " + tenant);
+        // During startup or background initialization there is no request tenant.
+        // Default to the public schema for JPA bootstrapping. Runtime request
+        // validation happens in TenantFilter.
+        if (tenant == null || tenant.isBlank()) {
+            logger.info("Resolved tenant: public");
+            return "public";
+        }
 
-        return tenant != null
-                ? tenant
-                : DEFAULT_TENANT;
+        logger.info("Resolved tenant: {}", tenant);
+        return tenant;
     }
 
     @Override

@@ -2,6 +2,9 @@ package com.example.Backend.Service;
 
 import com.example.Backend.Entity.ItemCategory;
 import com.example.Backend.Repository.ItemCategoryRepository;
+import com.example.Backend.Repository.UserRepository;
+import com.example.Backend.Entity.User;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +14,8 @@ import java.util.List;
 public class ItemCategoryService {
 
     private final ItemCategoryRepository repository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     public ItemCategoryService(ItemCategoryRepository repository) {
@@ -18,6 +23,11 @@ public class ItemCategoryService {
     }
 
     public ItemCategory create(ItemCategory itemCategory) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username);
+        if (user != null) {
+            itemCategory.setBranch(user.getBranch());
+        }
         return repository.save(itemCategory);
     }
 

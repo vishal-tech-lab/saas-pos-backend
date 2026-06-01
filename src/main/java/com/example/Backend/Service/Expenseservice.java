@@ -4,21 +4,46 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.Backend.Entity.Expense;
 import com.example.Backend.Repository.Expenserepo;
+import com.example.Backend.Repository.UserRepository;
+import com.example.Backend.Entity.User;
 @Service
 public class Expenseservice {
     
 
     @Autowired
     private Expenserepo expenserepo;
+    @Autowired
+    private UserRepository userRepository;
 
-    public String addthetotalexpense(Expense expense) {
-            expenserepo.save(expense);   
-            return "sucessfully updated"; 
-        }
+   public String addthetotalexpense(
+        Expense expense
+) {
+
+    String username =
+            SecurityContextHolder
+                    .getContext()
+                    .getAuthentication()
+                    .getName();
+
+    User user =
+            userRepository
+                    .findByUsername(
+                            username
+                    );
+
+    expense.setBranch(
+            user.getBranch()
+    );
+
+    expenserepo.save(expense);
+
+    return "successfully updated";
+}
     public List<Expense> getallexpense(Expense expense) {                    
       return  expenserepo.findAll();      
     }
