@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.Backend.Dto.TenantRequest;
 import com.example.Backend.Service.TenantProvisionService;
+import com.example.Backend.Dto.TenantLoginRequest;
+import com.example.Backend.Dto.TenantLoginResponse;
 
 @RestController
 @RequestMapping("/tenant")
