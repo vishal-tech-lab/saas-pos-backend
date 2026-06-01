@@ -21,71 +21,70 @@ public class TenantFilter extends OncePerRequestFilter {
     private static final Logger logger =
             LoggerFactory.getLogger(TenantFilter.class);
 
-  @Override
-protected void doFilterInternal(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        FilterChain filterChain
-) throws ServletException, IOException {
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
-    String path = request.getServletPath();
+        String path = request.getServletPath();
 
-    if (
-            path.equals("/")
-            || path.startsWith("/tenant/create")
-            || path.startsWith("/auth/login")
-            || path.startsWith("/auth/signup")
-            || path.startsWith("/auth/refresh")
-    ) {
+        // ✅ PUBLIC ROUTES
+        if (
+                path.equals("/")
+                || path.startsWith("/tenant/create")
+                || path.startsWith("/tenant/login")
+        ) {
 
-        filterChain.doFilter(
-                request,
-                response
-        );
-
-        return;
-    }
-
-    String tenant =
-            request.getHeader(
-                    "X-Tenant-ID"
+            filterChain.doFilter(
+                    request,
+                    response
             );
 
-    if (
-            tenant == null ||
-            tenant.isBlank()
-    ) {
+            return;
+        }
 
-        logger.warn(
-                "Tenant resolution failed, missing X-Tenant-ID for path: {}",
-                request.getServletPath()
+        String tenant =
+                request.getHeader(
+                        "X-Tenant-ID"
+                );
+
+        if (
+                tenant == null ||
+                tenant.isBlank()
+        ) {
+
+            logger.warn(
+                    "Tenant resolution failed, missing X-Tenant-ID for path: {}",
+                    request.getServletPath()
+            );
+
+            response.sendError(
+                    HttpServletResponse.SC_BAD_REQUEST,
+                    "X-Tenant-ID header is required"
+            );
+
+            return;
+        }
+
+        TenantContext.setTenant(tenant);
+
+        logger.info(
+                "Tenant resolved: {}",
+                tenant
         );
 
-        response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "X-Tenant-ID header is required"
-        );
+        try {
 
-        return;
+            filterChain.doFilter(
+                    request,
+                    response
+            );
+
+        } finally {
+
+            TenantContext.clear();
+        }
     }
-
-    TenantContext.setTenant(tenant);
-
-    logger.info(
-            "Tenant resolved: {}",
-            tenant
-    );
-
-    try {
-
-        filterChain.doFilter(
-                request,
-                response
-        );
-
-    } finally {
-
-        TenantContext.clear();
-    }
-}
 }
