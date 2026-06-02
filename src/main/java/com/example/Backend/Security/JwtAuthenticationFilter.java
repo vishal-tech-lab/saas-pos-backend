@@ -22,6 +22,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.example.Backend.multitenancy.tenant.TenantContext;
+
 @Component
 public class JwtAuthenticationFilter
         extends OncePerRequestFilter {
@@ -113,6 +115,8 @@ public class JwtAuthenticationFilter
                             token
                     );
 
+logger.info("JWT username: {}", username);
+logger.info("Tenant in JWT filter: {}", TenantContext.getTenant());
             UserDetails userDetails =
                     userDetailsService
                             .loadUserByUsername(
