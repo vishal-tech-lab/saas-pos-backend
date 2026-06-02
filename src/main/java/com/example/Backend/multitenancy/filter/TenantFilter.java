@@ -30,14 +30,13 @@ public class TenantFilter extends OncePerRequestFilter {
 
         String path = request.getServletPath();
 
-        // ✅ PUBLIC ROUTES
+        // ✅ PUBLIC ROUTES (no tenant required)
        if (
         path.equals("/")
         || path.startsWith("/tenant/create")
         || path.startsWith("/tenant/login")
         || path.startsWith("/auth/login")
         || path.startsWith("/auth/signup")
-        || path.startsWith("/auth/refresh")
 ) {
 
             filterChain.doFilter(
@@ -45,6 +44,21 @@ public class TenantFilter extends OncePerRequestFilter {
                     response
             );
 
+            return;
+        }
+
+        // ✅ REFRESH ENDPOINT - STILL NEEDS TENANT CONTEXT
+        if (path.startsWith("/auth/refresh")) {
+            String tenant = request.getHeader("X-Tenant-ID");
+            if (tenant != null && !tenant.isBlank()) {
+                TenantContext.setTenant(tenant);
+                logger.info("Tenant resolved for refresh: {}", tenant);
+            }
+            try {
+                filterChain.doFilter(request, response);
+            } finally {
+                TenantContext.clear();
+            }
             return;
         }
 

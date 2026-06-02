@@ -35,21 +35,22 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         try (Connection connection = dataSource.getConnection()) {
 
+            String tenant = TenantContext.getTenant();
+            if (tenant == null || tenant.isBlank()) {
+                logger.error("Tenant context is null for user details lookup of username: {}", username);
+                throw new UsernameNotFoundException("Tenant context missing");
+            }
 
-    connection.setSchema(
-        TenantContext.getTenant()
-    );
+            connection.setSchema(tenant);
 
-    logger.info("Current tenant for user details lookup: {}", TenantContext.getTenant());
-    logger.info("Database schema for user details lookup: {}", connection.getSchema());
+            logger.info("Loading user details - username: {}, tenant: {}, schema: {}", username, tenant, connection.getSchema());
 
             PreparedStatement ps = connection.prepareStatement(
-    "SELECT u.*, b.branchid AS bid, b.branchname AS bname, b.branchtype AS btype " +
-    "FROM " + TenantContext.getTenant() + ".users u " +
-    "LEFT JOIN " + TenantContext.getTenant() + ".branches b " +
-    "ON u.branchid = b.branchid " +
-    "WHERE u.username = ?"
-); 
+                "SELECT u.*, b.branchid AS bid, b.branchname AS bname, b.branchtype AS btype " +
+                "FROM users u " +
+                "LEFT JOIN branches b ON u.branchid = b.branchid " +
+                "WHERE u.username = ?"
+            ); 
 
             ps.setString(1, username);
 
