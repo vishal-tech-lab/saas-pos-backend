@@ -100,22 +100,27 @@ public class SecurityConfig {
                         "/branches/**",
                         "/users/**",
                         "/stocktransfer/**"
-                ).hasRole("ADMIN")
+                ).hasAnyRole("ADMIN","CASHIER","MANAGER", "KITCHEN")
 
                 // ADMIN + CASHIER
                 .requestMatchers(
                         "/salesitem/**"
                 ).hasAnyRole(
                         "ADMIN",
-                        "CASHIER","MANAGER"
+                        "CASHIER","MANAGER", "KITCHEN"
                 )
-
+ .requestMatchers(
+                        "/dashboard/**"
+                ).hasAnyRole(
+                        "ADMIN",
+                        "CASHIER","MANAGER", "KITCHEN"
+                )
                 // ADMIN + KITCHEN
                 .requestMatchers(
                         "/kitchenproduction/**"
                 ).hasAnyRole(
                         "ADMIN",
-                        "KITCHEN"
+                        "KITCHEN","CASHIER","MANAGER"
                 )
 
                 // PAYMENT - any authenticated user with a valid JWT
@@ -125,7 +130,7 @@ public class SecurityConfig {
                         "ADMIN",
                         "CASHIER","MANAGER"
                 )
-
+                
                 // EVERYTHING ELSE
                 .anyRequest().authenticated()
             )
