@@ -70,5 +70,13 @@ public RegisterSession getActiveSession(
     ) {
         service.delete(id);
     }
-  
+  @PostMapping("/close/{branchId}")
+public ResponseEntity<?> closeRegister(
+        @PathVariable Long branchId
+) {
+
+    salesitemService.closeRegister(branchId);
+
+    return ResponseEntity.ok().build();
+}
 }
