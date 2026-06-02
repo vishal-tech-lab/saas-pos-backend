@@ -35,6 +35,8 @@ public class TenantFilter extends OncePerRequestFilter {
     path.equals("/")
     || path.startsWith("/tenant/create")
     || path.startsWith("/tenant/login")
+    || path.startsWith("/auth/refresh")
+
 ) {
 
     filterChain.doFilter(

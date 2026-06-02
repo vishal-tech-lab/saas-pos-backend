@@ -110,6 +110,10 @@ public class AuthController {
         }
 
         String username = jwtUtil.extractUsername(refreshToken);
+        logger.info(
+    "Refresh tenant: {}",
+    TenantContext.getTenant()
+);
         User user = service.findByUsername(username);
         if (user == null) {
             logger.warn("Refresh token user not found: {}", username);
