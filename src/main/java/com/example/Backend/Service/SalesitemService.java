@@ -170,6 +170,43 @@ salesitem.setTotal(total);
 
         validateSalesitem(salesitem);
 
+
+    // AUTO OPEN REGISTER
+    Optional<RegisterSession> session =
+            registerSessionRepository
+                    .findByBranchAndActiveTrue(
+                            salesitem.getBranch()
+                    );
+
+    if (session.isEmpty()) {
+
+        RegisterSession newSession =
+                new RegisterSession();
+
+        newSession.setBranch(
+                salesitem.getBranch()
+        );
+
+        newSession.setOpenedat(
+                LocalDateTime.now()
+        );
+
+        newSession.setActive(true);
+
+        newSession.setTotalSales(0.0);
+
+        newSession.setCashSales(0.0);
+
+        newSession.setUpiSales(0.0);
+
+        newSession.setTotalBills(0);
+
+        registerSessionRepository.save(
+                newSession
+        );
+    }
+
+    // existing stock logic...
         Product product = productRepository.findByItemname(salesitem.getItemname())
                 .orElseThrow(() -> new RuntimeException("Product not found for item: " + salesitem.getItemname()));
 
