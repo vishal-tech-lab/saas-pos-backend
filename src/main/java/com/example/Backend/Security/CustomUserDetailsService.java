@@ -23,6 +23,7 @@ import java.util.List;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
+    
 
     private static final Logger logger =
             LoggerFactory.getLogger(CustomUserDetailsService.class);
@@ -39,7 +40,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     connection.setSchema(
         TenantContext.getTenant()
     );
-
+logger.info("=================================");
+logger.info("loadUserByUsername called");
+logger.info("Username: {}", username);
+logger.info("TenantContext: {}", TenantContext.getTenant());
+logger.info("=================================");
     logger.info("Current tenant for user details lookup: {}", TenantContext.getTenant());
     logger.info("Database schema for user details lookup: {}", connection.getSchema());
 
