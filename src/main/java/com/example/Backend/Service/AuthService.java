@@ -88,7 +88,7 @@ public class AuthService {
             logger.warn("Failed login attempt, account not approved: {}", username);
             throw new RuntimeException("Your account is not approved yet");
         }
-
+       
         logger.info("User login success: {}", username);
         return user;
     }
