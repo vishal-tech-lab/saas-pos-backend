@@ -56,10 +56,7 @@ public class KitchenProductionService {
             throw new RuntimeException("Production branch must be specified.");
         }
 
-        if (!"CENTRAL_KITCHEN".equalsIgnoreCase(branch.getBranchtype())) {
-            throw new RuntimeException("Only CENTRAL_KITCHEN branches can produce stock.");
-        }
-
+      
         Product product = production.getProduct();
         if (product == null) {
             throw new RuntimeException("Production product must be specified.");
