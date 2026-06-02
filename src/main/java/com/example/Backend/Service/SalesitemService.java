@@ -273,7 +273,8 @@ salesitem.setTotal(total);
         return salesitemRepository.findByBillnoAndBranch(billno, branch);
     }
 
-    public SalesReportDto getSalesReport(Long branchId) {
+public SalesReportDto getSalesReport(Long branchId) {
+
 Optional<RegisterSession> lastSession =
         registerSessionRepository
                 .findTopByOrderByClosedatDesc();
@@ -282,17 +283,29 @@ LocalDateTime startTime =
         lastSession
                 .map(RegisterSession::getClosedat)
                 .orElse(LocalDate.now().atStartOfDay());
-        List<Salesitem> salesitems;
-        if (branchId == null) {
-            salesitems = salesitemRepository.findByCreatedatBetween(startTime, LocalDateTime.now());
-        } else {
-            Branch branch = branchRepository.findById(branchId)
-                    .orElseThrow(() -> new RuntimeException("Branch not found"));
-            salesitems = salesitemRepository.findByBranchAndCreatedatBetween(branch, startTime, LocalDateTime.now());
-        }
 
-        return buildSalesReport(salesitems);
+    List<Salesitem> salesitems;
+
+    if (branchId == null) {
+        salesitems = salesitemRepository.findByCreatedatBetween(
+                startTime,
+                LocalDateTime.now()
+        );
+    } else {
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() ->
+                        new RuntimeException("Branch not found"));
+
+        salesitems = salesitemRepository
+                .findByBranchAndCreatedatBetween(
+                        branch,
+                        startTime,
+                        LocalDateTime.now()
+                );
     }
+
+    return buildSalesReport(salesitems);
+}
 
     public SalesReportDto getSalesReport() {
         return getSalesReport(null);
