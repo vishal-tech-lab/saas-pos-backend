@@ -48,8 +48,17 @@ public class AuthController {
         try {
             User user = service.login(req.getUsername(), req.getPassword());
 
-            String accessToken = jwtUtil.generateAccessToken(user);
-            String refreshToken = jwtUtil.generateRefreshToken(user);
+           String accessToken =
+        jwtUtil.generateAccessToken(
+                user,
+                TenantContext.getTenant()
+        );
+
+String refreshToken =
+        jwtUtil.generateRefreshToken(
+                user,
+                TenantContext.getTenant()
+        );
 
             boolean isSecure = !"dev".equals(env.getProperty("spring.profiles.active", "dev"));
 
@@ -120,8 +129,11 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("message", "User not found"));
         }
 
-        String accessToken = jwtUtil.generateAccessToken(user);
-
+String accessToken =
+        jwtUtil.generateAccessToken(
+                user,
+                TenantContext.getTenant()
+        );
         boolean isSecure = !"dev".equals(env.getProperty("spring.profiles.active", "dev"));
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)

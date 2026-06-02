@@ -29,20 +29,35 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 
-    public String generateAccessToken(User user) {
-        return Jwts.builder()
-                .setSubject(user.getUsername())
-                .claim("role", user.getRole())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(signingKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
+ public String generateAccessToken(
+        User user,
+        String tenant
+) {
 
-    public String generateRefreshToken(User user) {
+    return Jwts.builder()
+            .setSubject(user.getUsername())
+            .claim("role", user.getRole())
+            .claim("tenant", tenant)
+            .setIssuedAt(new Date())
+            .setExpiration(
+                new Date(
+                    System.currentTimeMillis()
+                    + jwtExpirationMs
+                )
+            )
+            .signWith(
+                signingKey(),
+                SignatureAlgorithm.HS256
+            )
+            .compact();
+}
+
+    public String generateRefreshToken(User user,        String tenant
+) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .claim("role", user.getRole())
+                .claim("tenant", tenant)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtRefreshExpirationMs))
                 .signWith(signingKey(), SignatureAlgorithm.HS256)
@@ -74,5 +89,24 @@ public class JwtUtil {
         } catch (Exception e) {
             return false;
         }
+
     }
+    public String extractTenant(
+        String token
+) {
+
+    Claims claims =
+            Jwts.parserBuilder()
+                    .setSigningKey(
+                            signingKey()
+                    )
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+    return claims.get(
+            "tenant",
+            String.class
+    );
+}
 }

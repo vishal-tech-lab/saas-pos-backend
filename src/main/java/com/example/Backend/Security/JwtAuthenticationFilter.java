@@ -55,10 +55,17 @@ public class JwtAuthenticationFilter
                 path.equals("/auth/refresh")
         ) {
 
-            filterChain.doFilter(
-                    request,
-                    response
-            );
+           try {
+
+    filterChain.doFilter(
+            request,
+            response
+    );
+
+} finally {
+
+    TenantContext.clear();
+}
 
             return;
         }
@@ -110,18 +117,19 @@ public class JwtAuthenticationFilter
                         .getAuthentication() == null
         ) {
 
-            String username =
-                    jwtUtil.extractUsername(
-                            token
-                    );
+           String username =
+        jwtUtil.extractUsername(token);
+
+String tenant =
+        jwtUtil.extractTenant(token);
+
+TenantContext.setTenant(tenant);
 
 logger.info("JWT username: {}", username);
-logger.info("Tenant in JWT filter: {}", TenantContext.getTenant());
-            UserDetails userDetails =
-                    userDetailsService
-                            .loadUserByUsername(
-                                    username
-                            );
+logger.info("Tenant from JWT: {}", tenant);
+
+UserDetails userDetails =
+        userDetailsService.loadUserByUsername(username);
 
             UsernamePasswordAuthenticationToken
                     auth =
@@ -145,9 +153,16 @@ logger.info("Tenant in JWT filter: {}", TenantContext.getTenant());
         }
 
         // ✅ CONTINUE FILTER CHAIN
-        filterChain.doFilter(
-                request,
-                response
-        );
+        try {
+
+    filterChain.doFilter(
+            request,
+            response
+    );
+
+} finally {
+
+    TenantContext.clear();
+}
     }
 }
