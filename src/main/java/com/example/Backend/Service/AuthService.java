@@ -100,13 +100,8 @@ public class AuthService {
         try (Connection connection = dataSource.getConnection()) {
 
             String tenant = TenantContext.getTenant();
-            if (tenant == null || tenant.isBlank()) {
-                logger.error("Tenant context is null during user lookup for username: {}", username);
-                throw new RuntimeException("Tenant context missing");
-            }
-            
             connection.setSchema(tenant);
-            logger.info("Tenant schema selected for user lookup: {} - tenant: {}", username, tenant);
+            logger.info("Tenant schema selected for user lookup: {}", tenant);
 
             PreparedStatement ps = connection.prepareStatement(
                     "SELECT u.*, b.branchid AS bid, b.branchname AS bname, b.branchtype AS btype " +

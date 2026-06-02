@@ -99,31 +99,22 @@ public class AuthController {
 
         @PostMapping("/refresh")
         public ResponseEntity<?> refresh(@CookieValue(value = "refresh_token", required = false) String refreshToken) {
-        try {
-            if (refreshToken == null) {
-                logger.warn("Refresh token missing for tenant: {}", TenantContext.getTenant());
-                return ResponseEntity.status(401).body(Map.of("message", "Refresh token missing"));
-            }
+        if (refreshToken == null) {
+            logger.warn("Refresh token missing");
+            return ResponseEntity.status(401).body(Map.of("message", "Refresh token missing"));
+        }
 
-            if (!jwtUtil.validateToken(refreshToken)) {
-                logger.warn("Invalid refresh token for tenant: {}", TenantContext.getTenant());
-                return ResponseEntity.status(401).body(Map.of("message", "Invalid refresh token"));
-            }
+        if (!jwtUtil.validateToken(refreshToken)) {
+            logger.warn("Invalid refresh token");
+            return ResponseEntity.status(401).body(Map.of("message", "Invalid refresh token"));
+        }
 
-            String username = jwtUtil.extractUsername(refreshToken);
-            String tenant = TenantContext.getTenant();
-            logger.info("Refresh token validation - username: {}, tenant: {}", username, tenant);
-            
-            if (tenant == null || tenant.isBlank()) {
-                logger.error("Tenant context is null during refresh for username: {}", username);
-                return ResponseEntity.status(401).body(Map.of("message", "Tenant context missing"));
-            }
-            
-            User user = service.findByUsername(username);
-            if (user == null) {
-                logger.warn("Refresh token user not found: {} in tenant: {}", username, tenant);
-                return ResponseEntity.status(401).body(Map.of("message", "User not found"));
-            }
+        String username = jwtUtil.extractUsername(refreshToken);
+        User user = service.findByUsername(username);
+        if (user == null) {
+            logger.warn("Refresh token user not found: {}", username);
+            return ResponseEntity.status(401).body(Map.of("message", "User not found"));
+        }
 
         String accessToken = jwtUtil.generateAccessToken(user);
 
@@ -148,14 +139,10 @@ public class AuthController {
             user.getBranch() != null ? user.getBranch().getBranchtype() : null
         );
 
-            logger.info("Refresh token accepted for user: {} in tenant: {}", username, tenant);
-            return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                .body(response);
-        } catch (Exception e) {
-            logger.error("Error during token refresh for tenant: {}", TenantContext.getTenant(), e);
-            return ResponseEntity.status(500).body(Map.of("message", "Token refresh failed: " + e.getMessage()));
-        }
+        logger.info("Refresh token accepted for user: {}", username);
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+            .body(response);
         }
 
         @PostMapping("/logout")
