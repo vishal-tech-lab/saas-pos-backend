@@ -118,12 +118,29 @@ String refreshToken =
             return ResponseEntity.status(401).body(Map.of("message", "Invalid refresh token"));
         }
 
-        String username = jwtUtil.extractUsername(refreshToken);
-        logger.info(
-    "Refresh tenant: {}",
-    TenantContext.getTenant()
+       String username =
+        jwtUtil.extractUsername(
+                refreshToken
+        );
+
+String tenant =
+        jwtUtil.extractTenant(
+                refreshToken
+        );
+
+TenantContext.setTenant(
+        tenant
 );
-        User user = service.findByUsername(username);
+
+logger.info(
+        "Refresh tenant: {}",
+        tenant
+);
+
+User user =
+        service.findByUsername(
+                username
+        );
         if (user == null) {
             logger.warn("Refresh token user not found: {}", username);
             return ResponseEntity.status(401).body(Map.of("message", "User not found"));
