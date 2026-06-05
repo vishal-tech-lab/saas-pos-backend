@@ -31,19 +31,15 @@ public class TenantFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
 
         // ✅ PUBLIC ROUTES
-     if (
+    if (
     path.equals("/")
     || path.startsWith("/tenant/create")
     || path.startsWith("/tenant/login")
     || path.startsWith("/auth/refresh")
-
+    || path.startsWith("/ws")
 ) {
 
-    filterChain.doFilter(
-            request,
-            response
-    );
-
+    filterChain.doFilter(request, response);
     return;
 }
 

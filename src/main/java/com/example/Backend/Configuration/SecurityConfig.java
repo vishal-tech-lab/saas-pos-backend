@@ -86,13 +86,34 @@ public class SecurityConfig {
 
                 // PUBLIC AUTH ROUTES
                 .requestMatchers(
-                        "/auth/login",
-                        "/auth/signup",
-            "/auth/refresh",
-        "/tenant/create",
-        "/tenant/login"
-                        
+    "/auth/login",
+    "/auth/signup",
+    "/auth/refresh",
+    "/tenant/create",
+    "/tenant/login",
+
+    "/ws",
+    "/ws/**",
+
+    "/customer-display/**"
+).permitAll()
+
+                // PUBLIC CUSTOMER ORDERING ROUTES
+                .requestMatchers(
+                        "/customer-menu/**",
+                        "/customer-order/create",
+                        "/customer-order/status/**"
                 ).permitAll()
+
+                // TABLE MANAGEMENT - ADMIN ONLY
+                .requestMatchers(
+                        "/table/**"
+                ).hasAnyRole("ADMIN","MANAGER")
+
+                // KITCHEN PROTECTED ROUTES
+                .requestMatchers(
+                        "/kitchen/**"
+                ).hasAnyRole("ADMIN","KITCHEN","MANAGER")
 
                 // ADMIN ONLY
                 .requestMatchers(
