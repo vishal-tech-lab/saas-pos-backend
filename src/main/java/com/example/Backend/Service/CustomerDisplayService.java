@@ -112,15 +112,31 @@ public class CustomerDisplayService {
             throw new IllegalArgumentException("Branch not found with id: " + branchid);
         }
 
-        CustomerDisplay display = customerDisplayRepository
-                .findByBranch_Branchid(branchid)
-                .orElseThrow(() -> {
-                    log.warn("No display found for branch: {}", branchid);
-                    return new IllegalArgumentException("No display found for branch id: " + branchid);
-                });
+        Optional<CustomerDisplay> displayOpt =
+            customerDisplayRepository
+                .findByBranch_Branchid(branchid);
+
+        if (displayOpt.isEmpty()) {
+
+            log.info(
+                "No display found for branch {}. Returning empty display.",
+                branchid
+            );
+
+            CustomerDisplayDto dto =
+                new CustomerDisplayDto();
+
+            dto.setBranchid(branchid);
+            dto.setBillno(null);
+            dto.setTotal(0.0);
+            dto.setStatus("CLEARED");
+            dto.setItems(new ArrayList<>());
+
+            return dto;
+        }
 
         log.info("Current display fetched for branch: {}", branchid);
-        return mapToDto(display);
+        return mapToDto(displayOpt.get());
     }
 
     /**
