@@ -33,6 +33,9 @@ config.addAllowedOrigin(
 config.addAllowedOrigin(
     "https://iwansta.com"
 );
+config.addAllowedOriginPattern(
+    "https://*.iwansta.com"
+);
         // ALLOW METHODS
 
         config.addAllowedMethod("*");
