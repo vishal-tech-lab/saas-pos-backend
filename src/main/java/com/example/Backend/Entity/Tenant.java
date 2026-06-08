@@ -32,5 +32,6 @@ private String username;
 
 @Column(nullable = false)
 private String password;
+private String subdomain;
 
 }

@@ -1,10 +1,15 @@
 package com.example.Backend.Entity;
 
+import lombok.Data;
+
+@Data
 public class TenantRequest {
-     
-private String companyName;
 
-private String username;
+    private String companyName;
 
-private String password;
+    private String subdomain;
+
+    private String username;
+
+    private String password;
 }

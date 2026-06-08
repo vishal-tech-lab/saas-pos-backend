@@ -35,11 +35,25 @@ public class TenantProvisionService {
         String companyName =
                 request.getCompanyName();
 
+        String subdomain =
+                request.getSubdomain();
+
+        if (subdomain == null || subdomain.isBlank()) {
+            subdomain = companyName
+                    .toLowerCase()
+                    .replace(" ", "_")
+                    .replace("-", "_");
+        } else {
+            subdomain = subdomain
+                    .toLowerCase()
+                    .trim()
+                    .replace(" ", "_")
+                    .replace("-", "_");
+        }
+
         String schemaName =
                 "tenant_" +
-                companyName
-                        .toLowerCase()
-                        .replace(" ", "_");
+                        subdomain;
 
         try (
                 Connection connection =
@@ -58,6 +72,16 @@ public class TenantProvisionService {
             if (exists) {
 
                 return "TENANT ALREADY EXISTS";
+            }
+
+            boolean subdomainExists =
+                    tenantRepository
+                            .existsBySubdomain(
+                                    subdomain
+                            );
+
+            if (subdomainExists) {
+                return "TENANT SUBDOMAIN ALREADY EXISTS";
             }
 
             statement.execute(
@@ -107,6 +131,10 @@ public class TenantProvisionService {
 
             tenant.setPassword(
                     encodedPassword
+            );
+
+            tenant.setSubdomain(
+                    subdomain
             );
 
             tenantRepository.save(
