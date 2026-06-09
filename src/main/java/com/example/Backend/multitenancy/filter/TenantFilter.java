@@ -43,6 +43,8 @@ public class TenantFilter extends OncePerRequestFilter {
                         || path.startsWith("/auth/login")
                         || path.startsWith("/auth/refresh")
                         || path.startsWith("/tenant/create")
+                        || path.startsWith("/tenant/login")
+|| path.startsWith("/tenant/by-subdomain")
                         || path.startsWith("/ws")
         ) {
 

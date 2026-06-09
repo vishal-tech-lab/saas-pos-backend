@@ -91,7 +91,7 @@ public class SecurityConfig {
     "/auth/refresh",
     "/tenant/create",
     "/tenant/login",
-
+ "/tenant/by-subdomain/**", 
     "/ws",
     "/ws/**",
 

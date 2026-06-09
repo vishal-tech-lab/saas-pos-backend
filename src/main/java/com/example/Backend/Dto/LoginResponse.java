@@ -17,4 +17,7 @@ public class LoginResponse {
     private Long branchid;
     private String branchname;
     private String branchtype;
+    private String plan;
+
+private String subscriptionStatus;
 }

@@ -13,7 +13,12 @@ public interface TenantRepository extends JpaRepository<Tenant, Long> {
     boolean existsBySubdomain(String subdomain);
 
     Tenant findByUsername(String username);
+
     Optional<Tenant> findBySubdomain(
-        String subdomain
-);
+            String subdomain
+    );
+
+    Optional<Tenant> findBySchemaName(
+            String schemaName
+    );
 }

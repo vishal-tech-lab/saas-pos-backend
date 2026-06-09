@@ -2,6 +2,7 @@ package com.example.Backend.Service;
 
 import java.sql.Connection;
 import java.sql.Statement;
+import java.time.LocalDate;
 
 import javax.sql.DataSource;
 
@@ -38,22 +39,26 @@ public class TenantProvisionService {
         String subdomain =
                 request.getSubdomain();
 
-        if (subdomain == null || subdomain.isBlank()) {
-            subdomain = companyName
-                    .toLowerCase()
-                    .replace(" ", "_")
-                    .replace("-", "_");
-        } else {
-            subdomain = subdomain
-                    .toLowerCase()
-                    .trim()
-                    .replace(" ", "_")
-                    .replace("-", "_");
-        }
+       if (subdomain == null || subdomain.isBlank()) {
 
-        String schemaName =
-                "tenant_" +
-                        subdomain;
+    subdomain = companyName
+            .toLowerCase()
+            .trim()
+            .replace(" ", "-")
+            .replace("_", "-");
+
+} else {
+
+    subdomain = subdomain
+            .toLowerCase()
+            .trim()
+            .replace(" ", "-")
+            .replace("_", "-");
+}
+
+     String schemaName =
+        "tenant_" +
+        subdomain.replace("-", "_");
 
         try (
                 Connection connection =
@@ -98,11 +103,10 @@ public class TenantProvisionService {
 
             flyway.migrate();
 
-            String encodedPassword =
-                    new BCryptPasswordEncoder()
-                            .encode(
-                                    request.getPassword()
-                            );
+           String encodedPassword =
+        passwordEncoder.encode(
+                request.getPassword()
+        );
 
             statement.execute(
                     "INSERT INTO "
@@ -135,6 +139,25 @@ public class TenantProvisionService {
 
             tenant.setSubdomain(
                     subdomain
+            );
+
+           tenant.setPlan(
+        request.getPlan() == null ||
+        request.getPlan().isBlank()
+                ? "BASIC"
+                : request.getPlan().toUpperCase()
+);
+
+            tenant.setSubscriptionStartDate(
+                    LocalDate.now()
+            );
+
+            tenant.setSubscriptionEndDate(
+                    LocalDate.now().plusDays(30)
+            );
+
+            tenant.setSubscriptionStatus(
+                    "ACTIVE"
             );
 
             tenantRepository.save(
@@ -171,6 +194,26 @@ public class TenantProvisionService {
         }
 
         if (
+                tenant.getSubscriptionEndDate() != null
+                &&
+                tenant.getSubscriptionEndDate()
+                        .isBefore(LocalDate.now())
+        ) {
+
+            tenant.setSubscriptionStatus(
+                    "EXPIRED"
+            );
+
+            tenantRepository.save(
+                    tenant
+            );
+
+            throw new RuntimeException(
+                    "Subscription Expired"
+            );
+        }
+
+        if (
                 !passwordEncoder.matches(
                         password,
                         tenant.getPassword()
@@ -183,9 +226,11 @@ public class TenantProvisionService {
         }
 
         return new TenantLoginResponse(
-                tenant.getSchemaName(),
-                tenant.getUsername(),
-                "TENANT_OWNER"
-        );
+        tenant.getSchemaName(),
+        tenant.getUsername(),
+        "TENANT_OWNER",
+        tenant.getPlan(),
+        tenant.getSubscriptionStatus()
+);
     }
 }

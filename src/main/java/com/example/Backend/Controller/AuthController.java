@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.Backend.Dto.LoginRequest;
 import com.example.Backend.Dto.LoginResponse;
+import com.example.Backend.Entity.Tenant;
 import com.example.Backend.Entity.User;
+import com.example.Backend.Repository.TenantRepository;
 import com.example.Backend.Service.AuthService;
 import com.example.Backend.Security.JwtUtil;
 import com.example.Backend.multitenancy.tenant.TenantContext;
@@ -32,7 +34,8 @@ public class AuthController {
 
     @Autowired
     private JwtUtil jwtUtil;
-
+@Autowired
+private TenantRepository tenantRepository;
     @Autowired
     private Environment env;
 
@@ -78,16 +81,26 @@ String refreshToken =
                 .maxAge(jwtRefreshExpirationMs / 1000)
                 .build();
 
-            LoginResponse response = new LoginResponse(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getRole(),
-                    user.getStatus(),
-                    TenantContext.getTenant(),
-                    user.getBranch() != null ? user.getBranch().getBranchid() : null,
-                    user.getBranch() != null ? user.getBranch().getBranchname() : null,
-                    user.getBranch() != null ? user.getBranch().getBranchtype() : null
-            );
+            Tenant tenant =
+                    tenantRepository
+                            .findBySchemaName(
+                                    TenantContext.getTenant()
+                            )
+                            .orElse(null);
+
+           LoginResponse response =
+        new LoginResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getRole(),
+                user.getStatus(),
+                TenantContext.getTenant(),
+                user.getBranch() != null ? user.getBranch().getBranchid() : null,
+                user.getBranch() != null ? user.getBranch().getBranchname() : null,
+                user.getBranch() != null ? user.getBranch().getBranchtype() : null,
+                tenant != null ? tenant.getPlan() : null,
+                tenant != null ? tenant.getSubscriptionStatus() : null
+        );
 
             return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
@@ -161,6 +174,13 @@ String accessToken =
             .maxAge(jwtExpirationMs / 1000)
             .build();
 
+        Tenant tenantInfo =
+                tenantRepository
+                        .findBySchemaName(
+                                TenantContext.getTenant()
+                        )
+                        .orElse(null);
+
         LoginResponse response = new LoginResponse(
             user.getId(),
             user.getUsername(),
@@ -169,39 +189,16 @@ String accessToken =
             TenantContext.getTenant(),
             user.getBranch() != null ? user.getBranch().getBranchid() : null,
             user.getBranch() != null ? user.getBranch().getBranchname() : null,
-            user.getBranch() != null ? user.getBranch().getBranchtype() : null
+            user.getBranch() != null ? user.getBranch().getBranchtype() : null,
+            tenantInfo != null ? tenantInfo.getPlan() : null,
+            tenantInfo != null ? tenantInfo.getSubscriptionStatus() : null
         );
 
-        logger.info("Refresh token accepted for user: {}", username);
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
             .body(response);
-        }
 
-        @PostMapping("/logout")
-        public ResponseEntity<?> logout() {
-       ResponseCookie accessCookie = ResponseCookie.from("access_token", "")
-    .httpOnly(true)
-    .secure(true)
-    .path("/")
-    .maxAge(0)
-    .sameSite("None")
-    .build();
-
-ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
-    .httpOnly(true)
-    .secure(true)
-    .path("/")
-    .maxAge(0)
-    .sameSite("None")
-    .build();
-
-        logger.info("Logout requested");
-        return ResponseEntity.ok()
-            .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-            .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-            .body(Map.of("message", "Logged out"));
-        }
+    }
         @PostMapping("/signup")
 public ResponseEntity<?> signup(
         @RequestBody LoginRequest req
@@ -234,5 +231,51 @@ public ResponseEntity<?> signup(
             );
     }
 }
+@PostMapping("/logout")
+public ResponseEntity<?> logout() {
 
+    ResponseCookie accessCookie =
+            ResponseCookie.from(
+                    "access_token",
+                    ""
+            )
+            .httpOnly(true)
+            .secure(true)
+            .path("/")
+            .maxAge(0)
+            .sameSite("None")
+            .build();
+
+    ResponseCookie refreshCookie =
+            ResponseCookie.from(
+                    "refresh_token",
+                    ""
+            )
+            .httpOnly(true)
+            .secure(true)
+            .path("/")
+            .maxAge(0)
+            .sameSite("None")
+            .build();
+
+    logger.info(
+            "Logout requested"
+    );
+
+    return ResponseEntity.ok()
+            .header(
+                    HttpHeaders.SET_COOKIE,
+                    accessCookie.toString()
+            )
+            .header(
+                    HttpHeaders.SET_COOKIE,
+                    refreshCookie.toString()
+            )
+            .body(
+                    Map.of(
+                            "message",
+                            "Logged out"
+                    )
+            );
+}
 }

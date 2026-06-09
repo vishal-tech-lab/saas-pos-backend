@@ -12,4 +12,6 @@ public class TenantRequest {
     private String username;
 
     private String password;
+
+    private String plan;
 }

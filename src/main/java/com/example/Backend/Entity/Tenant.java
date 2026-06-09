@@ -1,6 +1,7 @@
 package com.example.Backend.Entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,5 +34,10 @@ private String username;
 @Column(nullable = false)
 private String password;
 private String subdomain;
+
+private String plan;
+private LocalDate subscriptionStartDate;
+private LocalDate subscriptionEndDate;
+private String subscriptionStatus;
 
 }
