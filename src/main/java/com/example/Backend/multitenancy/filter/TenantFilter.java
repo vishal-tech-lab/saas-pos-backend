@@ -40,8 +40,7 @@ public class TenantFilter extends OncePerRequestFilter {
         // PUBLIC ROUTES
         if (
                 path.equals("/")
-                        || path.startsWith("/auth/login")
-                        || path.startsWith("/auth/refresh")
+                  
                         || path.startsWith("/tenant/create")
                         || path.startsWith("/tenant/login")
 || path.startsWith("/tenant/by-subdomain")
@@ -82,8 +81,20 @@ public class TenantFilter extends OncePerRequestFilter {
         String tenantSchema =
                 tenantEntity.getSchemaName();
 
-        logger.info("Schema: {}", tenantSchema);
+logger.info(
+        "Host: {}",
+        host
+);
 
+logger.info(
+        "Subdomain: {}",
+        subdomain
+);
+
+logger.info(
+        "Schema: {}",
+        tenantSchema
+);
         TenantContext.setTenant(
                 tenantSchema
         );
