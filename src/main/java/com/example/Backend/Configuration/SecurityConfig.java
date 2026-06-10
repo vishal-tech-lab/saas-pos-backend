@@ -164,15 +164,14 @@ public class SecurityConfig {
 
             // ✅ TENANT FILTER FIRST
             .addFilterBefore(
-                    tenantFilter,
-                    UsernamePasswordAuthenticationFilter.class
-            )
+        tenantFilter,
+        UsernamePasswordAuthenticationFilter.class
+)
 
-            // ✅ JWT FILTER AFTER TENANT
-            .addFilterBefore(
-                    jwtAuthenticationFilter,
-                    UsernamePasswordAuthenticationFilter.class
-            );
+.addFilterAfter(
+        jwtAuthenticationFilter,
+        TenantFilter.class
+);
 
         logger.info("Security filter chain configured");
         return http.build();

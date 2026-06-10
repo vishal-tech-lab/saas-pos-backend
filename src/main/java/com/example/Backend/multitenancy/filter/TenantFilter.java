@@ -34,7 +34,10 @@ public class TenantFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-
+logger.info(
+        "TenantFilter Executed -> {}",
+        request.getRequestURI()
+);
         String path = request.getServletPath();
 
         // PUBLIC ROUTES
@@ -51,22 +54,23 @@ public class TenantFilter extends OncePerRequestFilter {
             return;
         }
 
-        String host = request.getServerName();
+        String subdomain = request.getHeader(
+                "X-Tenant-ID"
+        );
 
-        logger.info("Host: {}", host);
+        logger.info(
+                "Tenant Header: {}",
+                subdomain
+        );
 
-        String rawSubdomain;
-
-        if (host.contains(".")) {
-
-            rawSubdomain = host.substring(0, host.indexOf('.'));
-
-        } else {
-
-            rawSubdomain = host;
+        if (
+                subdomain == null ||
+                subdomain.isBlank()
+        ) {
+            throw new RuntimeException(
+                    "Tenant header missing"
+            );
         }
-
-        String subdomain = rawSubdomain.toLowerCase();
 
         logger.info("Subdomain: {}", subdomain);
 
@@ -81,20 +85,10 @@ public class TenantFilter extends OncePerRequestFilter {
         String tenantSchema =
                 tenantEntity.getSchemaName();
 
-logger.info(
-        "Host: {}",
-        host
-);
-
-logger.info(
-        "Subdomain: {}",
-        subdomain
-);
-
-logger.info(
-        "Schema: {}",
-        tenantSchema
-);
+        logger.info(
+                "Schema: {}",
+                tenantSchema
+        );
         TenantContext.setTenant(
                 tenantSchema
         );
