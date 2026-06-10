@@ -90,6 +90,7 @@ public class SecurityConfig {
     "/auth/signup",
     "/auth/refresh",
     "/tenant/create",
+    "/tenant/onboard",
     "/tenant/login",
  "/tenant/by-subdomain/**", 
     "/ws",

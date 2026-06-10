@@ -46,6 +46,7 @@ logger.info(
                   
                         || path.startsWith("/tenant/create")
                         || path.startsWith("/tenant/login")
+                          || path.startsWith("/tenant/onboard")
 || path.startsWith("/tenant/by-subdomain")
                         || path.startsWith("/ws")
         ) {
