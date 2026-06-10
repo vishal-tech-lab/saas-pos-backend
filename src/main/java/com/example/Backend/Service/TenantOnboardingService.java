@@ -37,21 +37,21 @@ public class TenantOnboardingService {
 
         String schemaName = normalizeSchemaName(request.getSubdomain(), request.getCompanyName());
         try {
+
             TenantContext.setTenant(schemaName);
-            Branch branch = buildBranch(request.getBranchName());
-            Branch savedBranch = branchRepository.save(branch);
-User admin =
-        userRepository.findByUsername(
-                request.getAdminUsername()
-        );
 
-admin.setBranch(
-        savedBranch
-);
+            Branch branch =
+                    buildBranch(
+                            request.getBranchName()
+                    );
 
-userRepository.save(
-        admin
-);
+            System.out.println("STEP 1");
+
+            Branch savedBranch =
+                    branchRepository.save(branch);
+
+            System.out.println("STEP 2");
+
             createUser(
                     request.getManagerUsername(),
                     request.getManagerPassword(),
@@ -59,6 +59,9 @@ userRepository.save(
                     "APPROVED",
                     savedBranch
             );
+
+            System.out.println("STEP 3");
+
             createUser(
                     request.getCashierUsername(),
                     request.getCashierPassword(),
@@ -66,7 +69,11 @@ userRepository.save(
                     "APPROVED",
                     savedBranch
             );
+
+            System.out.println("STEP 4");
+
         } finally {
+
             TenantContext.clear();
         }
 
