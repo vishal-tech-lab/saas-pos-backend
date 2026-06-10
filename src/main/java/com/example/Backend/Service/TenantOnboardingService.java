@@ -23,7 +23,6 @@ public class TenantOnboardingService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    @Transactional
     public String onboardTenant(
             TenantOnboardingRequest request
     ) {
@@ -41,7 +40,18 @@ public class TenantOnboardingService {
             TenantContext.setTenant(schemaName);
             Branch branch = buildBranch(request.getBranchName());
             Branch savedBranch = branchRepository.save(branch);
+User admin =
+        userRepository.findByUsername(
+                request.getAdminUsername()
+        );
 
+admin.setBranch(
+        savedBranch
+);
+
+userRepository.save(
+        admin
+);
             createUser(
                     request.getManagerUsername(),
                     request.getManagerPassword(),
