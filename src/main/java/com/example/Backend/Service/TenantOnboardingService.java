@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.Backend.Dto.TenantOnboardingRequest;
 import com.example.Backend.Dto.TenantRequest;
+import com.example.Backend.multitenancy.tenant.TenantContext;
 
 import lombok.RequiredArgsConstructor;
 
@@ -77,10 +78,19 @@ public class TenantOnboardingService {
                                     .replace("-", "_");
         }
 
-        tenantDataInitializer.initialize(
-                schemaName,
-                request
-        );
+        TenantContext.setTenant(schemaName);
+
+        try {
+
+            tenantDataInitializer.initialize(
+                    schemaName,
+                    request
+            );
+
+        } finally {
+
+            TenantContext.clear();
+        }
 
         return "Tenant onboarded successfully";
     }

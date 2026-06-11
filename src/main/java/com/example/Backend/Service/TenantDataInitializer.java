@@ -1,13 +1,13 @@
 package com.example.Backend.Service;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.Backend.Dto.TenantOnboardingRequest;
 import com.example.Backend.Entity.Branch;
 import com.example.Backend.Entity.User;
 import com.example.Backend.Repository.BranchRepository;
 import com.example.Backend.Repository.UserRepository;
-import com.example.Backend.multitenancy.tenant.TenantContext;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,49 +21,39 @@ public class TenantDataInitializer {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    @Transactional(
+            propagation = Propagation.REQUIRES_NEW
+    )
     public void initialize(
             String schemaName,
             TenantOnboardingRequest request
     ) {
 
-        TenantContext.setTenant(schemaName);
+        Branch branch = new Branch();
+        branch.setBranchname(request.getBranchName());
+        branch.setBranchtype("HEAD");
+        branch.setAddress("Head Office");
+        branch.setPhone("0000000000");
+        branch.setStatus("ACTIVE");
 
+        Branch savedBranch = branchRepository.save(branch);
 
-System.out.println(
-    "SET TENANT = " +
-    TenantContext.getTenant()
-);
-        try {
+        User manager = new User();
+        manager.setUsername(request.getManagerUsername());
+        manager.setPassword(passwordEncoder.encode(request.getManagerPassword()));
+        manager.setRole("ROLE_MANAGER");
+        manager.setStatus("APPROVED");
+        manager.setBranch(savedBranch);
 
-            Branch branch = new Branch();
-            branch.setBranchname(request.getBranchName());
-            branch.setBranchtype("HEAD");
-            branch.setAddress("Head Office");
-            branch.setPhone("0000000000");
-            branch.setStatus("ACTIVE");
+        userRepository.save(manager);
 
-            Branch savedBranch = branchRepository.save(branch);
+        User cashier = new User();
+        cashier.setUsername(request.getCashierUsername());
+        cashier.setPassword(passwordEncoder.encode(request.getCashierPassword()));
+        cashier.setRole("ROLE_CASHIER");
+        cashier.setStatus("APPROVED");
+        cashier.setBranch(savedBranch);
 
-            User manager = new User();
-            manager.setUsername(request.getManagerUsername());
-            manager.setPassword(passwordEncoder.encode(request.getManagerPassword()));
-            manager.setRole("ROLE_MANAGER");
-            manager.setStatus("APPROVED");
-            manager.setBranch(savedBranch);
-
-            userRepository.save(manager);
-
-            User cashier = new User();
-            cashier.setUsername(request.getCashierUsername());
-            cashier.setPassword(passwordEncoder.encode(request.getCashierPassword()));
-            cashier.setRole("ROLE_CASHIER");
-            cashier.setStatus("APPROVED");
-            cashier.setBranch(savedBranch);
-
-            userRepository.save(cashier);
-
-        } finally {
-            TenantContext.clear();
-        }
+        userRepository.save(cashier);
     }
 }
