@@ -48,6 +48,11 @@ public class MultiTenantConnectionProviderImpl
             String tenantIdentifier
     ) throws SQLException {
 
+        System.out.println(
+            "GET CONNECTION FOR TENANT = " +
+            tenantIdentifier
+        );
+
         logger.info("Switching database schema to tenant: {}", tenantIdentifier);
 
         Connection connection = getAnyConnection();

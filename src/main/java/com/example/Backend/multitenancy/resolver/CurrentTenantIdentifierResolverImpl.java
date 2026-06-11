@@ -20,6 +20,10 @@ public class CurrentTenantIdentifierResolverImpl
 
         String tenant = TenantContext.getTenant();
 
+        System.out.println(
+            "RESOLVED TENANT = " + tenant
+        );
+
         // During startup or background initialization there is no request tenant.
         // Default to the public schema for JPA bootstrapping. Runtime request
         // validation happens in TenantFilter.

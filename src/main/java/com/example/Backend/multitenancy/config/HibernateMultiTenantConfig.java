@@ -23,6 +23,8 @@ public class HibernateMultiTenantConfig
     @Override
     public void customize(Map<String, Object> hibernateProperties) {
 
+        
+
         hibernateProperties.put(
                 AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER,
                 multiTenantConnectionProvider
