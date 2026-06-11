@@ -21,7 +21,6 @@ public class TenantDataInitializer {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    @Transactional
     public void initialize(
             String schemaName,
             TenantOnboardingRequest request
@@ -29,6 +28,11 @@ public class TenantDataInitializer {
 
         TenantContext.setTenant(schemaName);
 
+
+System.out.println(
+    "SET TENANT = " +
+    TenantContext.getTenant()
+);
         try {
 
             Branch branch = new Branch();
