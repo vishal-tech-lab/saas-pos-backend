@@ -31,7 +31,7 @@ public class TenantDataInitializer {
 
         Branch branch = new Branch();
         branch.setBranchname(request.getBranchName());
-        branch.setBranchtype("HEAD");
+branch.setBranchtype("BRANCH");
         branch.setAddress("Head Office");
         branch.setPhone("0000000000");
         branch.setStatus("ACTIVE");
