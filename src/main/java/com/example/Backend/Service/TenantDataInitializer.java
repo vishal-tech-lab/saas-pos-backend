@@ -1,6 +1,7 @@
 package com.example.Backend.Service;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.Backend.Dto.TenantOnboardingRequest;
@@ -19,8 +20,7 @@ public class TenantDataInitializer {
 
     private final BranchRepository branchRepository;
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-
+private final PasswordEncoder passwordEncoder;
     @Transactional(
             propagation = Propagation.REQUIRES_NEW
     )

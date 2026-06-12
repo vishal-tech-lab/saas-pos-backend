@@ -177,4 +177,6 @@ public class SecurityConfig {
         logger.info("Security filter chain configured");
         return http.build();
     }
+
+    
 }
