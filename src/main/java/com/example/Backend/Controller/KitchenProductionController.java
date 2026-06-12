@@ -17,11 +17,25 @@ public class KitchenProductionController {
 
     private final KitchenProductionService kitchenProductionService;
 
-    @PostMapping("/register")
-    public ResponseEntity<KitchenProduction> registerKitchenProduction(@RequestBody KitchenProductionDto productionDto) {
-        KitchenProduction createdProduction = kitchenProductionService.registerKitchenProduction(productionDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduction);
-    }
+   @PostMapping("/register")
+public ResponseEntity<KitchenProduction> registerKitchenProduction(
+        @RequestBody KitchenProductionDto productionDto
+) {
+
+    System.out.println(
+        "RECEIVED QTY = " +
+        productionDto.getQty()
+    );
+
+    KitchenProduction createdProduction =
+            kitchenProductionService.registerKitchenProduction(
+                    productionDto
+            );
+
+    return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(createdProduction);
+}
 
     @GetMapping("/all")
     public ResponseEntity<List<KitchenProduction>> getAllKitchenProductions() {

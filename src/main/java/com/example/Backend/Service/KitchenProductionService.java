@@ -41,6 +41,10 @@ public class KitchenProductionService {
         KitchenProduction production = new KitchenProduction();
         production.setBranch(branch);
         production.setProduct(product);
+        System.out.println(
+    "SERVICE DTO QTY = " +
+    productionDto.getQty()
+);
         production.setQty(productionDto.getQty());
         production.setNotes(productionDto.getNotes());
 
