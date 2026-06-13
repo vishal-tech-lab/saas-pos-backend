@@ -18,15 +18,31 @@ public class Expensecategoryservice {
     @Autowired
     private UserRepository userRepository;
 
-    public String getthetotalcatogry(Expensecategory expensecategory) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByUsername(username);
-        if (user != null) {
-            expensecategory.setBranch(user.getBranch());
-        }
-        expensecategoryrepo.save(expensecategory);
-        return "successfully saved";
+    public Expensecategory getthetotalcatogry(
+        Expensecategory expensecategory
+) {
+
+    String username =
+            SecurityContextHolder
+                    .getContext()
+                    .getAuthentication()
+                    .getName();
+
+    User user =
+            userRepository.findByUsername(
+                    username
+            );
+
+    if (user != null) {
+        expensecategory.setBranch(
+                user.getBranch()
+        );
     }
+
+    return expensecategoryrepo.save(
+            expensecategory
+    );
+}
 
     public List<Expensecategory> getallcatogry() {
         return expensecategoryrepo.findAll();

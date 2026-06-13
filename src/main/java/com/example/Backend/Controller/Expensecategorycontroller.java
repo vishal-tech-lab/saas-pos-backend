@@ -14,11 +14,15 @@ public class Expensecategorycontroller {
           
     @Autowired
     private Expensecategoryservice expensecategoryservice;
-
-    @PostMapping("register")
-    public String addtotalcatogry(@RequestBody Expensecategory expensecategory){
-        return expensecategoryservice.getthetotalcatogry(expensecategory);
-    }
+@PostMapping("register")
+public Expensecategory addtotalcatogry(
+        @RequestBody Expensecategory expensecategory
+){
+    return expensecategoryservice
+            .getthetotalcatogry(
+                    expensecategory
+            );
+}
     
     @GetMapping("all")
     public List<Expensecategory> getallcatogry(){
