@@ -5,6 +5,7 @@ import com.example.Backend.Entity.Branch;
 import com.example.Backend.Entity.BranchStock;
 import com.example.Backend.Entity.KitchenProduction;
 import com.example.Backend.Entity.Product;
+import com.example.Backend.Exception.ResourceNotFoundException;
 import com.example.Backend.Repository.BranchRepository;
 import com.example.Backend.Repository.BranchStockRepository;
 import com.example.Backend.Repository.KitchenProductionRepository;
@@ -87,12 +88,89 @@ public class KitchenProductionService {
         return kitchenProductionRepository.findById(id);
     }
 
-    public boolean deleteKitchenProduction(Long id) {
-        if (kitchenProductionRepository.existsById(id)) {
-            kitchenProductionRepository.deleteById(id);
-            return true;
+    @Transactional
+    public KitchenProduction updateKitchenProduction(Long id, KitchenProductionDto productionDto) {
+        if (productionDto == null) {
+            throw new IllegalArgumentException("Kitchen production request must not be null.");
         }
-        return false;
+
+        KitchenProduction existingProduction = kitchenProductionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Kitchen production not found with id: " + id));
+
+        Branch branch = branchRepository.findByBranchname(productionDto.getBranchname())
+                .orElseThrow(() -> new ResourceNotFoundException("Branch not found: " + productionDto.getBranchname()));
+
+        Product product = productRepository.findByItemname(productionDto.getProductname())
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + productionDto.getProductname()));
+
+        Double newQty = productionDto.getQty();
+        Double oldQty = existingProduction.getQty();
+
+        if (newQty == null || newQty <= 0) {
+            throw new IllegalArgumentException("Production quantity must be greater than zero.");
+        }
+
+        if (existingProduction.getBranch().equals(branch) && existingProduction.getProduct().equals(product)) {
+            BranchStock branchStock = branchStockRepository.findByBranchAndProduct(branch, product)
+                    .orElseGet(() -> createBranchStock(branch, product, 0.0));
+
+            double difference = newQty - oldQty;
+            double updatedStockQty = branchStock.getQty() + difference;
+            if (updatedStockQty < 0) {
+                throw new IllegalArgumentException("Branch stock cannot be negative after production update.");
+            }
+            branchStock.setQty(updatedStockQty);
+            branchStockRepository.save(branchStock);
+        } else {
+            BranchStock existingBranchStock = branchStockRepository.findByBranchAndProduct(
+                    existingProduction.getBranch(), existingProduction.getProduct())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Branch stock not found for existing production branch/product."));
+
+            double reducedQty = existingBranchStock.getQty() - oldQty;
+            if (reducedQty < 0) {
+                throw new IllegalArgumentException("Branch stock cannot be negative after production update.");
+            }
+            existingBranchStock.setQty(reducedQty);
+            branchStockRepository.save(existingBranchStock);
+
+            BranchStock newBranchStock = branchStockRepository.findByBranchAndProduct(branch, product)
+                    .orElseGet(() -> createBranchStock(branch, product, 0.0));
+            newBranchStock.setQty(newBranchStock.getQty() + newQty);
+            branchStockRepository.save(newBranchStock);
+        }
+
+        existingProduction.setBranch(branch);
+        existingProduction.setProduct(product);
+        existingProduction.setQty(newQty);
+        existingProduction.setNotes(productionDto.getNotes());
+
+        return kitchenProductionRepository.save(existingProduction);
+    }
+
+    public boolean deleteKitchenProduction(Long id) {
+        Optional<KitchenProduction> productionOpt = kitchenProductionRepository.findById(id);
+        if (productionOpt.isEmpty()) {
+            return false;
+        }
+
+        KitchenProduction production = productionOpt.get();
+        Branch branch = production.getBranch();
+        Product product = production.getProduct();
+
+        BranchStock stock = branchStockRepository.findByBranchAndProduct(branch, product)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Branch stock not found for branch and product."));
+
+        double updatedQty = stock.getQty() - production.getQty();
+        if (updatedQty < 0) {
+            throw new IllegalArgumentException("Branch stock cannot be negative after deleting production.");
+        }
+
+        stock.setQty(updatedQty);
+        branchStockRepository.save(stock);
+        kitchenProductionRepository.deleteById(id);
+        return true;
     }
 
     private void validateProduction(KitchenProduction production) {

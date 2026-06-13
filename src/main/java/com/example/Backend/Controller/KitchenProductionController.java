@@ -49,6 +49,15 @@ public ResponseEntity<KitchenProduction> registerKitchenProduction(
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<KitchenProduction> updateKitchenProduction(
+            @PathVariable Long id,
+            @RequestBody KitchenProductionDto productionDto
+    ) {
+        KitchenProduction updatedProduction = kitchenProductionService.updateKitchenProduction(id, productionDto);
+        return ResponseEntity.ok(updatedProduction);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteKitchenProduction(@PathVariable Long id) {
         if (kitchenProductionService.deleteKitchenProduction(id)) {
