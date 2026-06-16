@@ -121,82 +121,107 @@ String refreshToken =
 
         @PostMapping("/refresh")
         public ResponseEntity<?> refresh(@CookieValue(value = "refresh_token", required = false) String refreshToken) {
-        if (refreshToken == null) {
-            logger.warn("Refresh token missing");
-            return ResponseEntity.status(401).body(Map.of("message", "Refresh token missing"));
+        try {
+            if (refreshToken == null) {
+                logger.warn("Refresh token missing");
+                return ResponseEntity.status(401).body(Map.of("message", "Refresh token missing"));
+            }
+
+            try {
+                if (!jwtUtil.validateToken(refreshToken)) {
+                    return ResponseEntity.status(401).body(Map.of("message", "Invalid refresh token"));
+                }
+            } catch (Exception e) {
+                logger.error("Refresh validation failed", e);
+                return ResponseEntity.status(401).body(Map.of("message", "Invalid refresh token"));
+            }
+
+           String username =
+            jwtUtil.extractUsername(
+                    refreshToken
+            );
+
+    String tenant =
+            jwtUtil.extractTenant(
+                    refreshToken
+            );
+
+    logger.info("REFRESH TOKEN = {}", refreshToken);
+    logger.info("USERNAME = {}", username);
+    logger.info("TENANT = {}", tenant);
+
+    TenantContext.setTenant(
+            tenant
+    );
+
+    logger.info(
+            "Refresh tenant: {}",
+            tenant
+    );
+
+    User user =
+            service.findByUsername(
+                    username
+            );
+            if (user == null) {
+                logger.warn("Refresh token user not found: {}", username);
+                return ResponseEntity.status(401).body(Map.of("message", "User not found"));
+            }
+
+    String accessToken =
+            jwtUtil.generateAccessToken(
+                    user,
+                    TenantContext.getTenant()
+            );
+            boolean isSecure = !"dev".equals(env.getProperty("spring.profiles.active", "dev"));
+
+            ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .maxAge(jwtExpirationMs / 1000)
+                .build();
+
+            Tenant tenantInfo =
+                    tenantRepository
+                            .findBySchemaName(
+                                    TenantContext.getTenant()
+                            )
+                            .orElse(null);
+
+            LoginResponse response = new LoginResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getRole(),
+                user.getStatus(),
+                TenantContext.getTenant(),
+                user.getBranch() != null ? user.getBranch().getBranchid() : null,
+                user.getBranch() != null ? user.getBranch().getBranchname() : null,
+                user.getBranch() != null ? user.getBranch().getBranchtype() : null,
+                tenantInfo != null ? tenantInfo.getPlan() : null,
+                tenantInfo != null ? tenantInfo.getSubscriptionStatus() : null
+            );
+
+            return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .body(response);
+
+        } catch (Exception e) {
+            logger.error(
+                    "REFRESH ERROR",
+                    e
+            );
+
+            return ResponseEntity
+                    .status(500)
+                    .body(
+                            Map.of(
+                                    "message",
+                                    e.getMessage()
+                            )
+                    );
         }
-
-        if (!jwtUtil.validateToken(refreshToken)) {
-            logger.warn("Invalid refresh token");
-            return ResponseEntity.status(401).body(Map.of("message", "Invalid refresh token"));
-        }
-
-       String username =
-        jwtUtil.extractUsername(
-                refreshToken
-        );
-
-String tenant =
-        jwtUtil.extractTenant(
-                refreshToken
-        );
-
-TenantContext.setTenant(
-        tenant
-);
-
-logger.info(
-        "Refresh tenant: {}",
-        tenant
-);
-
-User user =
-        service.findByUsername(
-                username
-        );
-        if (user == null) {
-            logger.warn("Refresh token user not found: {}", username);
-            return ResponseEntity.status(401).body(Map.of("message", "User not found"));
-        }
-
-String accessToken =
-        jwtUtil.generateAccessToken(
-                user,
-                TenantContext.getTenant()
-        );
-        boolean isSecure = !"dev".equals(env.getProperty("spring.profiles.active", "dev"));
-
-        ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
-            .httpOnly(true)
-            .secure(true)
-            .path("/")
-            .sameSite("None")
-            .maxAge(jwtExpirationMs / 1000)
-            .build();
-
-        Tenant tenantInfo =
-                tenantRepository
-                        .findBySchemaName(
-                                TenantContext.getTenant()
-                        )
-                        .orElse(null);
-
-        LoginResponse response = new LoginResponse(
-            user.getId(),
-            user.getUsername(),
-            user.getRole(),
-            user.getStatus(),
-            TenantContext.getTenant(),
-            user.getBranch() != null ? user.getBranch().getBranchid() : null,
-            user.getBranch() != null ? user.getBranch().getBranchname() : null,
-            user.getBranch() != null ? user.getBranch().getBranchtype() : null,
-            tenantInfo != null ? tenantInfo.getPlan() : null,
-            tenantInfo != null ? tenantInfo.getSubscriptionStatus() : null
-        );
-
-        return ResponseEntity.ok()
-            .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-            .body(response);
 
     }
         @PostMapping("/signup")
