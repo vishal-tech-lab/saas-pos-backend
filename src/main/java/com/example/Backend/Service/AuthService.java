@@ -71,11 +71,14 @@ private UserRepository userRepository;
             throw new RuntimeException(e.getMessage());
         }
 
-        if (user == null) throw new RuntimeException("User not found");
+        if (user == null)
+    throw new RuntimeException("Invalid username or password");
 
-        if (!encoder.matches(password, user.getPassword())) throw new RuntimeException("Invalid password");
+if (!encoder.matches(password, user.getPassword()))
+    throw new RuntimeException("Invalid username or password");
 
-        if (!"APPROVED".equals(user.getStatus())) throw new RuntimeException("Your account is not approved yet");
+if (!"APPROVED".equals(user.getStatus()))
+    throw new RuntimeException("Invalid username or password");
 
         return user;
     }

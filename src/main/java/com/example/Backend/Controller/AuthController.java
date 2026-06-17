@@ -107,16 +107,22 @@ String refreshToken =
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                 .body(response);
         } catch (RuntimeException e) {
-            logger.warn("Failed login attempt: {}", req.getUsername());
-            return ResponseEntity
-                    .badRequest()
-                    .body(
-                            java.util.Map.of(
-                                    "message",
-                                    e.getMessage()
-                            )
-                    );
-        }
+
+    logger.warn(
+        "Failed login attempt for {} : {}",
+        req.getUsername(),
+        e.getMessage()
+    );
+
+    return ResponseEntity
+            .badRequest()
+            .body(
+                Map.of(
+                    "message",
+                    "Invalid username or password"
+                )
+            );
+}
     }
 
         @PostMapping("/refresh")
